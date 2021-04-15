@@ -4,12 +4,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yuricampolongo/crypto-monitoring/src/api/domain/nomics"
-	"github.com/yuricampolongo/crypto-monitoring/src/api/providers/nomics_provider"
+	"github.com/yuricampolongo/crypto-monitoring/currencies_service/src/api/domain"
+	"github.com/yuricampolongo/crypto-monitoring/currencies_service/src/api/providers"
 )
 
 func GetCryptoCurrencies(c *gin.Context) {
-	response, err := nomics_provider.GetCurrencies(nomics.CurrencyTickerRequest{
+	response, err := providers.Currencies.Get(domain.CurrencyRequest{
 		Ids:      c.Param("ids"),
 		Convert:  c.Param("convert"),
 		Interval: c.Param("interval"),
@@ -17,6 +17,7 @@ func GetCryptoCurrencies(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, "An error occurred to get currencies")
+		return
 	}
 
 	c.JSON(http.StatusOK, response)

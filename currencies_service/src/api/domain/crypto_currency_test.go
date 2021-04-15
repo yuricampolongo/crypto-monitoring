@@ -1,4 +1,4 @@
-package nomics
+package domain
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 )
 
 func TestCurrencyTickerRequestSucess(t *testing.T) {
-	request := CurrencyTickerRequest{
+	request := CurrencyRequest{
 		Ids:      "BTC,ETH",
 		Convert:  "CAD",
 		Interval: "1h",
@@ -18,7 +18,7 @@ func TestCurrencyTickerRequestSucess(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, bytes)
 
-	var target CurrencyTickerRequest
+	var target CurrencyRequest
 
 	err = json.Unmarshal(bytes, &target)
 	assert.Nil(t, err)

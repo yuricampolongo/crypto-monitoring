@@ -1,12 +1,12 @@
-package nomics_provider
+package providers
 
 import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
 
-	"github.com/yuricampolongo/crypto-monitoring/src/api/clients/restclient"
-	"github.com/yuricampolongo/crypto-monitoring/src/api/domain/nomics"
+	"github.com/yuricampolongo/crypto-monitoring/clients/restclient"
+	"github.com/yuricampolongo/crypto-monitoring/currencies_service/src/api/domain"
 )
 
 const (
@@ -16,7 +16,21 @@ const (
 	pathGetCurrencies     = "/v1/currencies/ticker"
 )
 
-func GetCurrencies(cryptoCurrencyRequest nomics.CurrencyTickerRequest) (*[]nomics.CurrencyTickerResponse, error) {
+var (
+	Currencies CurrenciesInterface
+)
+
+type CurrenciesInterface interface {
+	Get(cryptoCurrencyRequest domain.CurrencyRequest) (*[]domain.CurrencyResponse, error)
+}
+
+type currencies struct{}
+
+func init() {
+	Currencies = &currencies{}
+}
+
+func (c *currencies) Get(cryptoCurrencyRequest domain.CurrencyRequest) (*[]domain.CurrencyResponse, error) {
 	params := map[string]string{
 		"key":      apiKey,
 		"ids":      cryptoCurrencyRequest.Ids,
@@ -39,7 +53,7 @@ func GetCurrencies(cryptoCurrencyRequest nomics.CurrencyTickerRequest) (*[]nomic
 		return nil, errors.New("Nomics API error")
 	}
 
-	var result []nomics.CurrencyTickerResponse
+	var result []domain.CurrencyResponse
 	if err := json.Unmarshal(bytes, &result); err != nil {
 		return nil, errors.New("Error to unmarshal response body")
 	}

@@ -1,12 +1,12 @@
-package nomics
+package domain
 
-type CurrencyTickerRequest struct {
+type CurrencyRequest struct {
 	Ids      string `json:"ids"`
 	Convert  string `json:"convert"`
 	Interval string `json:"interval"`
 }
 
-type CurrencyTickerResponse struct {
+type CurrencyResponse struct {
 	Id        string `json:"id"`
 	Currency  string `json:"currency"`
 	Name      string `json:"name"`
