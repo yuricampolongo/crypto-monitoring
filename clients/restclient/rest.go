@@ -9,7 +9,22 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-func Get(endpoint string, path string, queryParams map[string]string) (*http.Response, error) {
+var (
+	Do RestInterface
+)
+
+type RestInterface interface {
+	Get(endpoint string, path string, queryParams map[string]string) (*http.Response, error)
+}
+
+type rest struct {
+}
+
+func init() {
+	Do = &rest{}
+}
+
+func (c *rest) Get(endpoint string, path string, queryParams map[string]string) (*http.Response, error) {
 	var finalUrl *url.URL
 
 	finalUrl, err := url.Parse(endpoint)

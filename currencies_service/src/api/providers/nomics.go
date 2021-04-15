@@ -38,24 +38,24 @@ func (c *currencies) Get(cryptoCurrencyRequest domain.CurrencyRequest) (*[]domai
 		"interval": cryptoCurrencyRequest.Interval,
 	}
 
-	response, err := restclient.Get(endpointGetCurrencies, pathGetCurrencies, params)
+	response, err := restclient.Do.Get(endpointGetCurrencies, pathGetCurrencies, params)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error to get currencies from API")
 	}
 
 	bytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("invalid response body")
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != sucessfullResponse {
-		return nil, errors.New("Nomics API error")
+		return nil, errors.New("nomics API error")
 	}
 
 	var result []domain.CurrencyResponse
 	if err := json.Unmarshal(bytes, &result); err != nil {
-		return nil, errors.New("Error to unmarshal response body")
+		return nil, errors.New("error to unmarshal response body")
 	}
 
 	return &result, nil
