@@ -3,7 +3,6 @@ package restclient
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"net/url"
 
 	"github.com/go-resty/resty/v2"
@@ -14,7 +13,7 @@ var (
 )
 
 type RestInterface interface {
-	Get(endpoint string, path string, queryParams map[string]string) (*http.Response, error)
+	Get(endpoint string, path string, queryParams map[string]string) (*Response, error)
 }
 
 type rest struct {
@@ -24,12 +23,12 @@ func init() {
 	Do = &rest{}
 }
 
-func (c *rest) Get(endpoint string, path string, queryParams map[string]string) (*http.Response, error) {
+func (c *rest) Get(endpoint string, path string, queryParams map[string]string) (*Response, error) {
 	var finalUrl *url.URL
 
 	finalUrl, err := url.Parse(endpoint)
 	if err != nil {
-		return nil, errors.New("Invalid endpoint")
+		return nil, errors.New("invalid endpoint")
 	}
 
 	finalUrl.Path = path
@@ -40,10 +39,14 @@ func (c *rest) Get(endpoint string, path string, queryParams map[string]string) 
 	response, err := client.R().Get(finalUrl.String())
 	fmt.Println(finalUrl.String())
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Error to perform GET request to endpoint (%v)", finalUrl.String()))
+		errorDesc := fmt.Sprintf("error to perform GET request to endpoint (%v)", finalUrl.String())
+		return nil, errors.New(errorDesc)
 	}
 
-	return response.RawResponse, nil
+	return &Response{
+		StatusCode: response.StatusCode(),
+		Body:       response.String(),
+	}, nil
 }
 
 func buildQueryParams(queryParams map[string]string) string {

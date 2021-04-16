@@ -46,3 +46,9 @@ To use the mock:
 To mock the call and the return:
 
 	mockDoer.EXPECT().DoSomething(123, "Hello GoMock").Return(nil).Times(1)
+
+### Existing mocks
+
+	$GOPATH/bin/mockgen -destination=currencies_services/src/api/providers/nomics_mocker.go -package=providers github.com/yuricampolongo/crypto-monitoring/currencies_service/src/api/providers CurrenciesInterface
+
+	$GOPATH/bin/mockgen -destination=clients/restclient/rest_mocker.go -package=restclient github.com/yuricampolongo/crypto-monitoring/clients/restclient RestInterface

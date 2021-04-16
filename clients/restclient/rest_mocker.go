@@ -5,7 +5,6 @@
 package restclient
 
 import (
-	http "net/http"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -35,10 +34,10 @@ func (m *MockRestInterface) EXPECT() *MockRestInterfaceMockRecorder {
 }
 
 // Get mocks base method.
-func (m *MockRestInterface) Get(arg0, arg1 string, arg2 map[string]string) (*http.Response, error) {
+func (m *MockRestInterface) Get(arg0, arg1 string, arg2 map[string]string) (*Response, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", arg0, arg1, arg2)
-	ret0, _ := ret[0].(*http.Response)
+	ret0, _ := ret[0].(*Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

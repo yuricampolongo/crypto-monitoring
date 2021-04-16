@@ -3,20 +3,21 @@ package providers
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"log"
+	"os"
 
 	"github.com/yuricampolongo/crypto-monitoring/clients/restclient"
 	"github.com/yuricampolongo/crypto-monitoring/currencies_service/src/api/domain"
 )
 
 const (
-	apiKey                = "1b1a19cbba9fe8adce2d3e34dc5a5fd3"
 	sucessfullResponse    = 200
 	endpointGetCurrencies = "https://api.nomics.com"
 	pathGetCurrencies     = "/v1/currencies/ticker"
 )
 
 var (
+	apiKey     *string
 	Currencies CurrenciesInterface
 )
 
@@ -31,8 +32,10 @@ func init() {
 }
 
 func (c *currencies) Get(cryptoCurrencyRequest domain.CurrencyRequest) (*[]domain.CurrencyResponse, error) {
+	checkApiKey()
+
 	params := map[string]string{
-		"key":      apiKey,
+		"key":      (*apiKey),
 		"ids":      cryptoCurrencyRequest.Ids,
 		"convert":  cryptoCurrencyRequest.Convert,
 		"interval": cryptoCurrencyRequest.Interval,
@@ -43,20 +46,24 @@ func (c *currencies) Get(cryptoCurrencyRequest domain.CurrencyRequest) (*[]domai
 		return nil, errors.New("error to get currencies from API")
 	}
 
-	bytes, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, errors.New("invalid response body")
-	}
-	defer response.Body.Close()
-
 	if response.StatusCode != sucessfullResponse {
 		return nil, errors.New("nomics API error")
 	}
 
 	var result []domain.CurrencyResponse
-	if err := json.Unmarshal(bytes, &result); err != nil {
+	if err := json.Unmarshal([]byte(response.Body), &result); err != nil {
 		return nil, errors.New("error to unmarshal response body")
 	}
 
 	return &result, nil
+}
+
+func checkApiKey() {
+	value, present := os.LookupEnv("NOMICS_API_KEY")
+	if !present {
+		log.Fatal("no Nomics API Key set. Please set the key in the environment variable $NOMICS_API_KEY")
+		apiKey = nil
+		return
+	}
+	apiKey = &value
 }
