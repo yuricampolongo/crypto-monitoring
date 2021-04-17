@@ -9,9 +9,10 @@ Feel free to fork and change whatever you need
 
 
 ## Installation
-For now, you must run the services manually, I'll provide soon the docker configurations to execute the project as a container.
+For now, you must run the services manually, I'll provide soon the docker configurations to execute the project in a container.
 
 `go run currencies_service/main.go`
+
 `go run user_info_service/main.go`
 
 ## Endpoints
@@ -20,6 +21,16 @@ For now, you must run the services manually, I'll provide soon the docker config
 |--|--|--|--|
 | /crypto/currency/:ids/:convert/:interval | GET | Return a list of prices for each crypto currency in the :ids param | http://localhost:8080/crypto/currency/BTC,ETH/BRL/1h
 | /user/add | POST | Create/Update a new user to monitor his/hers investments | http://localhost:8081/user/add {"name":"Geralt","email":"geralt@ofrivia.com"}
+
+## Configuring NOMICS API Key
+
+You must get an APIKey from the Nomics API because the currencies_service uses this API to retrieve crypto data.
+
+You can get your key here: https://p.nomics.com/cryptocurrency-bitcoin-api
+
+After getting your key, you must configure the environment variable NOMICS_API_KEY with the value that you've gotten.
+
+*I'll change that later when I add the docker configuration, because that will be set during container creation, but you will need the key anyway*
 
 ## Configuring AWS credentials to use DynamoDB
 
