@@ -4,4 +4,5 @@ import "github.com/yuricampolongo/crypto-monitoring/user_info_service/src/api/co
 
 func mapUrls() {
 	router.POST("/user/add", controllers.AddUser)
+	router.POST("/user/monitor/crypto", controllers.MonitorCrypto)
 }

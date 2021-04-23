@@ -11,26 +11,26 @@ import (
 )
 
 const (
-	userTable = "tUser"
+	userCryptoMonitorTable = "tUser_crypto"
 )
 
 func init() {
-	db.Provider().CreateTable(userTable)
+	db.Provider().CreateTable(userCryptoMonitorTable)
 }
 
-func AddUser(c *gin.Context) {
+func MonitorCrypto(c *gin.Context) {
 	jsonData, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, "invalid request body")
 	}
-	var user domain.User
-	err = json.Unmarshal(jsonData, &user)
+	var cryptos *domain.Crypto
+	err = json.Unmarshal(jsonData, &cryptos)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, "error to unmarshal json body request")
 	}
 
-	err = db.Provider().Save(user, userTable)
+	err = db.Provider().Save(cryptos, userCryptoMonitorTable)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, "error to save user")
+		c.JSON(http.StatusInternalServerError, "error to save crypto monitor information")
 	}
 }

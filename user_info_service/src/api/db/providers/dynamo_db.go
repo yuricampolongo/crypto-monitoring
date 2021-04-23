@@ -12,47 +12,42 @@ import (
 	"github.com/yuricampolongo/crypto-monitoring/user_info_service/src/api/domain"
 )
 
-type dynamoDBInterface interface {
-	Save(user domain.User) error
-}
-type dynamoDB struct{}
-
-const (
-	userTable = "tUser"
-)
+type dynamoDBProvider struct{}
 
 var (
-	DynamoDB dynamoDBInterface
+	DynamoDB dynamoDBProvider
 	sess     *session.Session
 	svc      *dynamodb.DynamoDB
 )
 
 func init() {
-	DynamoDB = &dynamoDB{}
+	DynamoDB = dynamoDBProvider{}
 	sess = session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
 	svc = dynamodb.New(sess)
-	createUserTable()
 }
 
-func (d *dynamoDB) Save(user domain.User) error {
-	if user.Id == nil {
-		//new user, we create an UUID
-		uuid := uuid.NewString()
-		user.Id = &uuid
-	}
+func (d *dynamoDBProvider) Save(in interface{}, table string) error {
+	data := in.(domain.Entity)
 
-	av, err := dynamodbattribute.MarshalMap(user)
+	av, err := dynamodbattribute.MarshalMap(data)
 	if err != nil {
 		log.Fatalf("Got error marshalling map: %s", err)
 		return err
 	}
 
+	if data.GetId() == "" { //new entity, we create an UUID
+		id := uuid.NewString()
+		av["id"] = &dynamodb.AttributeValue{
+			S: &id,
+		}
+	}
+
 	// Create item in table tUser
 	input := &dynamodb.PutItemInput{
 		Item:      av,
-		TableName: aws.String(userTable),
+		TableName: aws.String(table),
 	}
 
 	_, err = svc.PutItem(input)
@@ -61,13 +56,13 @@ func (d *dynamoDB) Save(user domain.User) error {
 		return err
 	}
 
-	fmt.Println("Successfully added '" + user.Name + "' (" + (*user.Id) + ") to table " + userTable)
+	fmt.Println("Successfully added item to table " + table)
 
 	return nil
 }
 
-func createUserTable() {
-	if !checkTableExists() {
+func (d *dynamoDBProvider) CreateTable(tableName string) bool {
+	if !checkTableExists(tableName) {
 		input := &dynamodb.CreateTableInput{
 			AttributeDefinitions: []*dynamodb.AttributeDefinition{
 				{
@@ -85,26 +80,29 @@ func createUserTable() {
 				ReadCapacityUnits:  aws.Int64(10),
 				WriteCapacityUnits: aws.Int64(10),
 			},
-			TableName: aws.String(userTable),
+			TableName: aws.String(tableName),
 		}
 
 		_, err := svc.CreateTable(input)
 		if err != nil {
 			log.Fatalf("Got error calling CreateTable: %s", err)
+			return false
 		}
 
-		fmt.Println("Created the table", userTable)
+		fmt.Println("Created the table", tableName)
+		return true
 	}
+	return true // table already exists
 }
 
-func checkTableExists() bool {
+func checkTableExists(tableName string) bool {
 	input := &dynamodb.ListTablesInput{}
 	result, err := svc.ListTables(input)
 	if err != nil {
 		panic(err)
 	}
 	for _, n := range result.TableNames {
-		if *n == userTable {
+		if *n == tableName {
 			return true
 		}
 	}
